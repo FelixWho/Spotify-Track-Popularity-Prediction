@@ -1,0 +1,118 @@
+---
+title: "Proposal"
+subtitle: "STA 210 - Project"
+author: "Soy Nuggets -  Madeleine Jones, Felix Hu, Isabel Siebrecht, Jason Yang"
+format: pdf
+editor: visual
+---
+
+# TidyTuesday Spotify Billboard
+
+```{r}
+#| label: load-pkg-data
+#| warning: false
+library(tidyverse)
+library(tidymodels)
+library(knitr)
+
+billboard <- readr::read_csv(paste('https://raw.githubusercontent.com/',
+                                   'rfordatascience/tidytuesday/master/', 
+                                   'data/2021/2021-09-14/billboard.csv', 
+                                   sep=''))
+audio_features <- readr::read_csv(paste('https://raw.githubusercontent.com/', 
+                                        'rfordatascience/tidytuesday/master/', 
+                                        'data/2021/2021-09-14/',
+                                        'audio_features.csv', 
+                                        sep=''))
+
+songs_joined <- billboard %>% inner_join(audio_features, by = "song_id")
+songs_joined <- na.omit(songs_joined)
+songs_joined$performer.y <- NULL
+songs_joined$song.y <- NULL
+songs_joined <- songs_joined %>% rename(song = song.x, 
+                                        performer = performer.x)
+```
+
+## Introduction
+
+**Spotify** is a popular music streaming service that has 406 million monthly listeners as of 2021. It has two tiers, free and premium, both of which let users play any song of their choice (with the free tier containing advertisements).
+
+**Billboard 100** is the de facto standard record chart for the US. The entity publishes weekly charts that rank songs and albums by popularity.
+
+Song popularity has major commercial implications. Record labels aim to place their songs as high on the charts as possible, and accumulate as many Spotify popularity points in order to influence Spotify's recommendation system. That way, they can discover and accumulate more new listeners. (Eichler 2020)
+
+With this in mind, our group aims to explore how audio features such as danceability, tempo, genre influence song popularity. Record labels would find this analysis beneficial for their business because such insights could help them increase the number of streams of songs under the label. We hypothesize the genre and loudness have the strongest correlation with a song's popularity.
+
+**Sources:**
+
+Eichler, Oskar. "Spotify Popularity -  a Unique Insight into the Spotify Algorithm and How to Influence It." *Medium*, The Songstats Lab, 7 Oct. 2020, https://lab.songstats.com/spotify-popularity-a-unique-insight-into-the-spotify-algorithm-and-how-to-influence-it-93bb63863ff0.
+
+How Many Users Do Spotify, Apple Music and Streaming Services Have?,
+
+https://musically.com/2022/02/03/spotify-apple-how-many-users-big-music-streaming-services.
+
+## Data description
+
+Our data contains two csv files that will be the primary concern of this proposal: the billboard and audio_features files. In the billboard csv file, there are 327,895 observations with 10 columns (variables). Each observation is a song, and has the song name, performer/artist, as well as how long the song stayed on the Billboard 100 and its peak position during its time on there. There is also a variable named instance, which reveals how many times that song has appeareed on the chart. This particular dataset came from the Billboard Weekly Hot 100 singles chart up until the year 2020.
+
+In the audio_features csv file, there are 29,503 observations with 22 columns (variables). Each observation is a song, and they are once again classified by the usual song name and genre, but the key information are the "features" each song contains, which include variables like danceability, key, loudness, accousticness, tempo, and time signature. Each of these variables is assigned a number that ranges from 0-1; the larger the number, the more of that particular factor is displays. For example, a song with danceability value 0.966 is much more danceable than one with a value of 0.110.
+
+The data was sourced from Data.World by someone named Sean Miller, who meticulously scraped Billboard and the Spotify API for the relevant data. Once he scraped it, it was compiled into the two csv files and published into the tidytuesday GitHub repository where we found it.
+
+**Source:** https://data.world/kcmillersean/billboard-hot-100-1958-2017
+
+## Analysis approach
+
+**Response variable**: `spotify_track_popularity`
+
+A double value from 0-100 that represents a track's popularity. 100 is the most popular whereas 0 is the least. A high score increases the song's likelihood of being added to radios/other discovery methods.
+
+```{r visualize-response-var}
+
+ggplot(songs_joined, aes(x=spotify_track_popularity)) + 
+  geom_histogram(binwidth = 5) +
+  labs(
+    x = "Popularity",
+    title = "Spotify Track Popularity Distribution"
+  )
+
+songs_joined %>%
+  summarize(mean = mean(spotify_track_popularity, na.rm = T),
+            median = median(spotify_track_popularity, na.rm = T),
+            sd = sd(spotify_track_popularity, na.rm = T),
+            IQR = IQR(spotify_track_popularity, na.rm = T)) %>%
+  kable(digits = 3)
+
+```
+
+**Predictor variables:**
+
+We initially intend to use these variables as predictors, although this is subject to change.
+
+-   `weeks_on_chart`
+
+-   `peak_position`
+
+-   `spotify_genre`
+
+-   `spotify_track_duration_ms`
+
+-   `energy`
+
+-   `key`
+
+-   `mode`
+
+-   `speechiness`
+
+-   `liveness`
+
+-   `valence`
+
+-   `tempo`
+
+**Model technique:** We will be using multiple linear regression to predict the numerical response variable `spotify_track_popularity`.
+
+## Data dictionary
+
+The data dictionary can be found [here](https://github.com/sta210-s22/project-soy_nuggets/blob/main/data/README.md)

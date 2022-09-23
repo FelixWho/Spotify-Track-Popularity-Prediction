@@ -1,0 +1,108 @@
+---
+title: "Topic ideas"
+subtitle: "STA 210 - Project"
+author: "Soy nuggets - Madeleine Jones, Felix Hu, Isabel Siebrecht, Jason Yang"
+format: pdf
+editor: visual
+---
+
+```{r install-packages, echo=FALSE}
+library(tidyverse)
+library(tidymodels)
+```
+
+# Project idea 1: Lemurs
+
+## Introduction and data
+
+-   This dataset comes from Tidy Tuesday, and was collected by the Duke Lemur Center.
+
+-   The data were originally collected by the Duke Lemur Center (and cleaned by Jesse Mostipak) between 1966 and this past year (2021).
+
+-   The dataset includes variables that the Duke Lemur Center has decided affect the health, reproduction, and social dynamics of the lemurs the most. These variables include extensive data on a lemur's birth-place, various weights throughout their life, their offspring, taxonomic species, etc. There are both categorical (ex: a lemur's current or birth location) and numerical (ex: number of offspring) data, which are used together to comprehensively understand the factors impacting lemurs.
+
+```{r import-lemur-data, echo=FALSE}
+lemurs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-08-24/lemur_data.csv')
+
+```
+
+## Research question
+
+-   How do certain characteristics of the lemurs (weight, taxonomy, age, etc) impact their offspring, overall health (as measured by lifespan, gestation, weight, etc)? What characteristics of their surroundings (birth location, current location) impact their physical attributes?
+
+## Glimpse of data
+
+```{r glimpse-lemurs}
+#| label: data-1
+glimpse(lemurs)
+
+```
+
+\pagebreak
+
+# Project idea 2
+
+## Introduction and data
+
+-   This dataset comes from Tidy Tuesday, and was sourced from Billboard.com, Spotify.
+
+-   The data were originally collected for Data.World by Sean Miller using the Spotify Web API and Weekly Hot 100 Billboard chart in 2018.
+
+-   Aside from a song's performer, genre, duration, this dataset includes features about a song's popularity (number of weeks on the chart, peak position on chart) as well as Spotify song metadata (valence, loudness, danceability, etc.). Thus we see a good mix of categorical and numerical features.
+
+```{r import-billboard-data, echo=FALSE}
+billboard <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-14/billboard.csv')
+audio_features <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-14/audio_features.csv')
+```
+
+```{r wrangle-data, echo=FALSE}
+
+songs_joined <- billboard %>% inner_join(audio_features, by = "song_id")
+songs_joined <- na.omit(songs_joined)
+songs_joined$performer.y <- NULL
+songs_joined$song.y <- NULL
+songs_joined <- songs_joined %>% rename(song = song.x, performer = performer.x)
+```
+
+## Research question
+
+-   How do song characteristics such as energy, key, danceability affect its popularity? What are some characteristics of popular songs? Are there any trends in popular song characteristics over time?
+
+## Glimpse of data
+
+```{r glimpse-billboard}
+#| label: data-2
+
+glimpse(songs_joined)
+```
+
+\pagebreak
+
+# Project idea 3
+
+## Introduction and data
+
+-   The Bechdel dataset is from Tidy Tuesday, which got it from FiveThirtyEight, which sourced the data from the Bechdeltest.com API and the-numbers.com.
+
+-   Part of the data was collected by Bechdeltest.com. There, users submit movie entries. The other part was collected from the-numbers.com that stores movie business data. The two datasets' intersection spans 1990 to 2013.
+
+-   The dataset includes general movie data including budget, rating, genre, actors. There is also a Bechdel score attached showing how many of the Bechdel thresholds the movie meets. There is an even mix of numerical and categorical variables.
+
+    ```{r import-bechdel-data, echo=FALSE}
+    #| label: data-3
+    #| 
+    raw_bechdel <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-09/raw_bechdel.csv')
+    movies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-09/movies.csv')
+    ```
+
+## Research question
+
+-   How does a combination of budget, genre, runtime, and gender representation among other factors influence move ratings?
+
+## Glimpse of data
+
+```{r glimpse-bechdel}
+#| label: data-3
+glimpse(movies)
+
+```
